@@ -3,6 +3,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function LoginIn() {
   const [email, setEmail] = useState('');
@@ -16,16 +17,28 @@ export default function LoginIn() {
         email,
         password,
       });
-
-      if (response.data.success) {
-        
-        localStorage.setItem('access_token', response.data.access_token);
-
+  
       
-        router.push('/todos');
+      if (response.status === 201) {
+        toast.success('Registration successful! Redirecting to login...');
+        localStorage.setItem('access_token', response.data.access_token);
+        setTimeout(() => {
+          router.push('/todos'); 
+        }, 2000); 
+      }
+      else {
+
+        toast.error(response.data.message || 'Login failed');
       }
     } catch (error) {
       console.error('Login failed', error);
+  
+
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || 'An error occurred');
+      } else {
+        toast.error('An unexpected error occurred');
+      }
     }
   };
 

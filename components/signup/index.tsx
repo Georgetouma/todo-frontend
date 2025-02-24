@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import toast from 'react-hot-toast';
 
 
 const schema = yup.object().shape({
@@ -26,18 +27,33 @@ export default function SignUp() {
     resolver: yupResolver(schema),
   });
 
+
+  type FormData = yup.InferType<typeof schema>; 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
       const response = await axios.post(`${backendUrl}/api/auth/register`, data);
   
-      console.log('Backend Response:', response);
+  
       if (response.status === 201) {
-        console.log('Redirecting to /login'); 
-        router.push('/auth');
+        toast.success('Registration successful! Redirecting to login...');
+  
+        setTimeout(() => {
+          router.push('/auth'); 
+        }, 2000); 
       }
     } catch (error) {
       console.error('Registration failed', error);
+  
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 409) {
+          toast.error('Email already in use');
+        } else {
+          toast.error('Registration failed. Please try again.');
+        }
+      } else {
+        toast.error('An unexpected error occurred');
+      }
     }
   };
 
@@ -45,13 +61,13 @@ export default function SignUp() {
     <section>
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="py-12 md:py-20">
-          {/* Section header */}
+         
           <div className="pb-12 text-center">
             <h1 className=" text-white animate-[gradient_6s_linear_infinite] bg-[linear-gradient(to_right,var(--color-gray-200),var(--color-indigo-200),var(--color-gray-50),var(--color-indigo-300),var(--color-gray-200))] bg-[length:200%_auto] bg-clip-text font-nacelle text-3xl font-semibold text-transparent md:text-4xl">
               Create an account
             </h1>
           </div>
-          {/* Contact form */}
+          
           <form onSubmit={handleSubmit(onSubmit)} className="mx-auto max-w-[400px]">
             <div className="space-y-5">
               <div>
@@ -105,10 +121,10 @@ export default function SignUp() {
              
             </div>
           </form>
-          {/* Bottom link */}
+  
           <div className="mt-6 text-center text-sm text-white">
             Already have an account?{' '}
-            <Link className="font-medium text-indigo-500" href="/(auth)/login">
+            <Link className="font-medium text-indigo-500" href="/auth">
               Sign in
             </Link>
           </div>

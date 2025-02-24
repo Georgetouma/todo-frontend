@@ -1,13 +1,14 @@
 import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-export interface Todo {
-  id: string;
+export type Todo = {
+  id: number;          
   description: string;
-  priority: 'low' | 'medium' | 'high';
-  date: string;
+  priority: number;  
+  date: string;        
   completed: boolean;
-}
+};
+
 export const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -15,7 +16,7 @@ export const api = axios.create({
   },
 });
 
-// Add request interceptor to include JWT token
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
